@@ -1,18 +1,20 @@
 "=============================================================================
 " File : selbuff.vim
 " Author : Todd Cosgrove (tcosgrov@twcny.rr.com)
-" Last update : Fri Sep 14 2001
-" Version : 1.5
+" Last update : Fri Oct 19 2001
+" Version : 1.6
 "-----------------------------------------------------------------------------
 " Selbuff.vim is an easy way to select a buffer.  It works by creating
 " a window (n < (&lines/2) ? n : (&lines/2)) lines high listing all buffers 
 " (except the selection temp buffer).  Moving the cursor to a line and pressing
 " <CR> opens a window showing that buffer. Moving the cursor to a line and 
 " pressing d delete's the buffer.  Moving the cursor to a line and pressing w 
-" with save the file.  Pressing q within the select buffer window closes the
-" window (the buffer is still loaded).
+" will save the file.  Pressing q within the select buffer window closes the
+" window (the buffer is still loaded).  's' toggles the sort order between
+" filename and bufnum.
 "
 " Type <Leader>bl to use the buffer list.
+" Type <Leader>bL to use the buffer list, showing unlisted buffers.
 "=============================================================================
 " ToDo:
 " -----
@@ -24,6 +26,8 @@
 " ----------  ---  -----------------------------------------------------------
 " 03-24-2000  tjc  - Created Module.
 " 10-18-2001  tjc  - Made some changes more in line with vim60.
+" 10-19-2001  tjc  - Fixed the 'w' functionality that I broke when making 
+"                    changes for vim60.
 "=============================================================================
 
 " Has this already been loaded?
@@ -431,6 +435,9 @@ endfunction
 "----------------------
 function! <SID>KeyWrite( )
 
+    " Save curr bufnum
+    let cbn = bufnr( "." )
+
     " Get the buffer line
     let bufline = getline( "." )
 
@@ -438,9 +445,8 @@ function! <SID>KeyWrite( )
     let bufnum = substitute( strpart( bufline, 0, 5 ), " *", "", "" ) + 0
 
     " Has buffer changed ("+" char in column 8)?
-    let bufchanged = strpart( bufline, 7, 1 ) 
-
-    if bufchanged == "+"
+    let bufchanged = getbufvar( bufnum, "&mod" )
+    if bufchanged == 1
 
         let sbfilename = bufname( bufnum )
 
@@ -458,13 +464,13 @@ function! <SID>KeyWrite( )
         exe "write! " . sbfilename
         
         " Switch back to the selection buffer
-        exe "buffer " . bufnr( "_selbuff.tmp" )
+        exe "buffer #"
 
-        " Erase selection buffer contents
-        call <SID>ClearBuffer( )
+        " Recreate the selection buffer
+        exe "bwipeout _selbuff.tmp"
 
-        " Recreate selection buffer list
-        call <SID>ListBuffers( )
+        " Start all over again
+        call <SID>Main( s:showall )
 
      else
 
