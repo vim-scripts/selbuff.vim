@@ -1,0 +1,3 @@
+This is a mirror of http://www.vim.org/scripts/script.php?script_id=125
+
+selbuff.vim is an easy way to select a buffer, very similar to bufexplorer.  It works by creating a window (n < (&lines/2) ? n : (&lines/2)) lines high listing all buffers (except the selection temp buffer) at the bottom of the vim frame.  Moving the cursor to a line and pressing <CR> shows the selected buffer in the window you were in when you pressed <Leader>bl. Moving the cursor to a line and pressing 'd' delete's the buffer.  Moving the cursor to a line and pressing 'w' will write the file.  Pressing 'q' within the select buffer window closes the window.
